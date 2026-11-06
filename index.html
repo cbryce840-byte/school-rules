@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Rules Adventure!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+            min-height: 100vh;
+        }
+        h1, h2, h3, .font-title {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Custom CSS Drawings / Illustrations */
+        .css-badge {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fde047 0%, #eab308 100%);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), inset 0 2px 4px rgba(255,255,255,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 4px solid #facc15;
+        }
+        .css-pencil {
+            width: 20px;
+            height: 70px;
+            background: linear-gradient(to right, #fb923c, #fdba74);
+            border-radius: 4px;
+            position: relative;
+            transform: rotate(-30deg);
+        }
+        .css-pencil::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #fef08a;
+        }
+        .css-star {
+            font-size: 32px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showScreen('dashboard')">
+            <div class="bg-indigo-600 text-white p-2 rounded-2xl shadow-lg font-title text-xl font-bold flex items-center justify-center w-12 h-12">
+                🏫
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-indigo-900 leading-tight">School Rules Quest</h1>
+                <p class="text-xs text-slate-500 font-medium">Learn, Play & Grow Together!</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Score & Badges Pill -->
+            <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full shadow-inner">
+                <span class="text-xl">⭐</span>
+                <span id="header-score" class="font-bold text-amber-700 text-sm md:text-base">0 pts</span>
+            </div>
+            <div class="flex items-center space-x-1 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full shadow-inner">
+                <span class="text-xl">🏆</span>
+                <span id="header-badges" class="font-bold text-emerald-700 text-sm md:text-base">0/20</span>
+            </div>
+            <button onclick="app.showScreen('dashboard')" class="bg-indigo-600 hover:bg-indigo-700 text-white font-title px-4 py-2 rounded-xl shadow-md transition transform active:scale-95 text-sm">
+                Dashboard
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-5xl">
+        
+        <!-- DASHBOARD SCREEN -->
+        <section id="screen-dashboard" class="space-y-6">
+            <!-- Welcome Banner with CSS illustration -->
+            <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="z-10 space-y-3 max-w-xl text-center md:text-left">
+                    <span class="bg-white/20 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Interactive Adventure</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold font-title">Why School Rules Matter!</h2>
+                    <p class="text-indigo-100 text-sm md:text-base">
+                        Complete all 20 mini-activities, discover what to do and what NOT to do, collect badges, and become the ultimate School Super Citizen!
+                    </p>
+                    <div class="pt-2 flex flex-wrap justify-center md:justify-start gap-3">
+                        <button onclick="app.startFirstIncomplete()" class="bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-bold font-title px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95 flex items-center space-x-2">
+                            <span>🚀</span> <span>Continue Journey</span>
+                        </button>
+                        <button onclick="app.resetProgress()" class="bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-3 rounded-2xl transition text-sm">
+                            Reset Progress
+                        </button>
+                    </div>
+                </div>
+                <!-- CSS Illustration Hero -->
+                <div class="mt-6 md:mt-0 z-10 flex items-center space-x-4">
+                    <div class="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 flex flex-col items-center animate-float">
+                        <div class="text-5xl mb-2">🎒📚✏️</div>
+                        <span class="font-title text-sm tracking-wide">Ready to Learn</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar Card -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="w-full md:w-2/3 space-y-2">
+                    <div class="flex justify-between text-sm font-bold">
+                        <span class="text-slate-700">Overall Completion</span>
+                        <span id="dash-progress-text" class="text-indigo-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                        <div id="dash-progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-right">
+                        <div class="text-xs text-slate-400 font-bold uppercase">Completed</div>
+                        <div id="dash-completed-count" class="text-xl font-bold font-title text-slate-800">0 / 20</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 20 Activities Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold font-title text-slate-800">The 20 Rule Adventures</h3>
+                    <span class="text-sm text-slate-500">Click any activity to play!</span>
+                </div>
+                <div id="activities-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <!-- Dynamic Activity Cards inserted here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ACTIVITY GAME SCREEN -->
+        <section id="screen-activity" class="hidden space-y-6">
+            <!-- Top bar back button & Title -->
+            <div class="flex items-center justify-between bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100">
+                <button onclick="app.showScreen('dashboard')" class="flex items-center space-x-2 text-indigo-600 font-bold hover:text-indigo-800 transition">
+                    <span>⬅️</span> <span>Back to Dashboard</span>
+                </button>
+                <div id="activity-badge-tag" class="bg-indigo-50 text-indigo-700 font-title px-4 py-1.5 rounded-full text-sm font-bold">
+                    Activity #1
+                </div>
+            </div>
+
+            <!-- Game Container -->
+            <div id="activity-container" class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-100 min-h-[450px] flex flex-col justify-between">
+                <!-- Dynamic Activity Content -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Success Modal / Toast Notification -->
+    <div id="modal-success" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl text-center space-y-4 animate-float">
+            <div class="text-6xl" id="modal-emoji">🎉</div>
+            <h3 id="modal-title" class="text-2xl font-extrabold font-title text-slate-800">Fantastic Job!</h3>
+            <p id="modal-desc" class="text-slate-600 text-sm">You earned 50 points and unlocked a new badge!</p>
+            <div class="pt-4 flex space-x-3 justify-center">
+                <button onclick="app.closeModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-title px-6 py-3 rounded-2xl shadow-lg transition transform active:scale-95 w-full">
+                    Continue Adventure 🌟
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-slate-400 text-xs font-medium">
+        School Rules Quest &bull; Interactive Educational Web App &bull; Designed for Students & Teachers
+    </h2>
+
+    <script>
+        // Sound utility using Tone.js
+        let synth = null;
+        function initSound() {
+            if (!synth) {
+                synth = new Tone.Synth().toDestination();
+            }
+        }
+        function playSound(type) {
+            try {
+                initSound();
+                if (type === 'success') {
+                    synth.triggerAttackRelease("C5", "8n");
+                    setTimeout(() => synth.triggerAttackRelease("E5", "8n"), 100);
+                    setTimeout(() => synth.triggerAttackRelease("G5", "4n"), 200);
+                } else if (type === 'click') {
+                    synth.triggerAttackRelease("C4", "16n");
+                } else if (type === 'error') {
+                    synth.triggerAttackRelease("G3", "8n");
+                }
+            } catch (e) {
+                console.log("Audio context note started yet.");
+            }
+        }
+
+        // 20 Defined Activities Data
+        const activitiesData = [
+            {
+                id: 1,
+                title: "Walk in the Hallway",
+                subtitle: "Safety First",
+                icon: "🚶‍♂️",
+                type: "sort",
+                desc: "Sort behaviors into what to do and what NOT to do in the school hallways.",
+                items: [
+                    { text: "Walk calmly on the right side", correct: "do" },
+                    { text: "Run as fast as you can", correct: "dont" },
+                    { text: "Keep hands and feet to yourself", correct: "do" },
+                    { text: "Push friends while waiting", correct: "dont" }
+                ],
+                why: "Walking prevents tripping, slipping, and colliding with others, keeping everyone safe."
+            },
+            {
+                id: 2,
+                title: "Raise Your Hand",
+                subtitle: "Classroom Respect",
+                icon: "🙋‍♀️",
+                type: "quiz",
+                question: "What should you do when you want to speak during a class lesson?",
+                options: [
+                    { text: "Shout out the answer immediately", correct: false },
+                    { text: "Raise your hand and wait to be called on", correct: true },
+                    { text: "Start talking to your neighbor", correct: false },
+                    { text: "Stand up on your chair", correct: false }
+                ],
+                why: "Raising your hand ensures everyone gets an equal chance to speak and be heard without chaos."
+            },
+            {
+                id: 3,
+                title: "Listen to the Teacher",
+                subtitle: "Focus & Attention",
+                icon: "👂",
+                type: "truefalse",
+                statement: "It is polite and helpful to look at the teacher and listen attentively when instructions are given.",
+                answer: true,
+                why: "Listening carefully helps you understand assignments correctly and shows respect for your teacher's hard work."
+            },
+            {
+                id: 4,
+                title: "Bully-Free Zone",
+                subtitle: "Kindness & Empathy",
+                icon: "🤝",
+                type: "sort",
+                desc: "Identify kind actions versus hurtful actions on the school playground.",
+                items: [
+                    { text: "Invite someone sitting alone to play", correct: "do" },
+                    { text: "Call someone mean names", correct: "dont" },
+                    { text: "Share your toys and jump rope", correct: "do" },
+                    { text: "Exclude classmates from games on purpose", correct: "dont" }
+                ],
+                why: "Kindness builds a warm, friendly community where every student feels safe and valued."
+            },
+            {
+                id: 5,
+                title: "Respect School Property",
+                subtitle: "Caring for Supplies",
+                icon: "📚",
+                type: "quiz",
+                question: "How should you treat school textbooks and library books?",
+                options: [
+                    { text: "Draw pictures inside them with crayons", correct: false },
+                    { text: "Keep them clean, use bookmarks, and handle gently", correct: true },
+                    { text: "Tear pages out if you don't like them", correct: false },
+                    { text: "Leave them outside in the rain", correct: false }
+                ],
+                why: "Taking care of books ensures that future students can also enjoy and learn from them."
+            },
+            {
+                id: 6,
+                title: "Be On Time",
+                subtitle: "Punctuality",
+                icon: "⏰",
+                type: "fillblank",
+                sentence: "Arriving to class on ______ ensures you don't miss important morning announcements and lessons.",
+                options: ["time", "recess", "lunch", "home"],
+                correct: 0,
+                why: "Being punctual shows responsibility and helps the classroom start smoothly without interruptions."
+            },
+            {
+                id: 7,
+                title: "Quiet in the Library",
+                subtitle: "Peaceful Study",
+                icon: "🤫",
+                type: "truefalse",
+                statement: "You should run around and shout loudly inside the school library.",
+                answer: false,
+                why: "The library is a quiet space for reading and studying. Keeping voices down helps everyone concentrate."
+            },
+            {
+                id: 8,
+                title: "Cafeteria Manners",
+                subtitle: "Clean & Polite",
+                icon: "🥪",
+                type: "sort",
+                desc: "Sort good cafeteria habits from messy ones.",
+                items: [
+                    { text: "Clean up your tray and throw trash in the bin", correct: "do" },
+                    { text: "Throw food across the cafeteria table", correct: "dont" },
+                    { text: "Chew with your mouth closed and say please", correct: "do" },
+                    { text: "Leave spills and garbage on the table for others", correct: "dont" }
+                ],
+                why: "Good table manners keep the lunchroom hygienic and pleasant for everyone sharing the space."
+            },
+            {
+                id: 9,
+                title: "Sharing & Teamwork",
+                subtitle: "Working Together",
+                icon: "🧩",
+                type: "quiz",
+                question: "When working in a group project, what is the best way to succeed?",
+                options: [
+                    { text: "Refuse to let anyone else help", correct: false },
+                    { text: "Share ideas, listen to teammates, and divide tasks fairly", correct: true },
+                    { text: "Let one person do all the work while you play", correct: false },
+                    { text: "Argue until nobody does the project", correct: false }
+                ],
+                why: "Teamwork combines everyone's strengths and makes learning fun and collaborative."
+            },
+            {
+                id: 10,
+                title: "Keep Restrooms Clean",
+                subtitle: "Hygiene & Respect",
+                icon: "🧻",
+                type: "truefalse",
+                statement: "You should wash your hands with soap after using the restroom and keep the facilities clean.",
+                answer: true,
+                why: "Good personal hygiene prevents the spread of germs and keeps the school healthy for all students."
+            },
+            {
+                id: 11,
+                title: "Line Up Properly",
+                subtitle: "Order & Safety",
+                icon: "🧍‍♂️",
+                type: "fillblank",
+                sentence: "When the bell rings for recess or dismissal, students should line up quietly in a single ______.",
+                options: ["file", "mess", "circle", "race"],
+                correct: 0,
+                why: "Lining up in order helps teachers move the class safely through hallways without blocking others."
+            },
+            {
+                id: 12,
+                title: "Honesty & Truthfulness",
+                subtitle: "Character",
+                icon: "🌟",
+                type: "quiz",
+                question: "If you accidentally break something in the classroom, what should you do?",
+                options: [
+                    { text: "Hide it and blame someone else", correct: false },
+                    { text: "Tell the teacher honestly and apologize", correct: true },
+                    { text: "Pretend nothing happened", correct: false },
+                    { text: "Run away and hide", correct: false }
+                ],
+                why: "Honesty builds trust between students and teachers, making it easier to solve problems together."
+            },
+            {
+                id: 13,
+                title: "Use Inside Voices",
+                subtitle: "Voice Levels",
+                icon: "🗣️",
+                type: "truefalse",
+                statement: "You should scream at the top of your lungs inside the classroom during study time.",
+                answer: false,
+                why: "Using calm inside voices allows everyone in the classroom to focus on their independent reading and work."
+            },
+            {
+                id: 14,
+                title: "Follow Bus Safety",
+                subtitle: "Transit Rules",
+                icon: "🚌",
+                type: "sort",
+                desc: "Sort safe and unsafe behaviors while riding the school bus.",
+                items: [
+                    { text: "Remain seated with your seatbelt fastened", correct: "do" },
+                    { text: "Stand up and walk while the bus is moving", correct: "dont" },
+                    { text: "Talk quietly to the person next to you", correct: "do" },
+                    { text: "Throw objects out of the bus window", correct: "dont" }
+                ],
+                why: "Bus safety protects you and your driver from sudden stops and dangerous distractions."
+            },
+            {
+                id: 15,
+                title: "Dress Code & Preparedness",
+                subtitle: "Ready for Class",
+                icon: "🎒",
+                type: "quiz",
+                question: "What items should you bring to school every single day?",
+                options: [
+                    { text: "Your backpack with books, pencils, and homework", correct: true },
+                    { text: "Video games and heavy toys", correct: false },
+                    { text: "Nothing at all", correct: false },
+                    { text: "Candy and soda", correct: false }
+                ],
+                why: "Being prepared with your school supplies ensures you are ready to participate in every lesson."
+            },
+            {
+                id: 16,
+                title: "Respect Personal Space",
+                subtitle: "Boundaries",
+                icon: "🫂",
+                type: "truefalse",
+                statement: "It is important to respect your classmates' personal space and keep hands to yourself.",
+                answer: true,
+                why: "Respecting personal boundaries makes everyone feel comfortable and secure around their peers."
+            },
+            {
+                id: 17,
+                title: "Emergency Drills",
+                subtitle: "Safety Preparedness",
+                icon: "🚨",
+                type: "fillblank",
+                sentence: "During a fire drill, you must walk quickly, quietly, and follow your teacher to the designated safety ______.",
+                options: ["zone", "playground", "cafeteria", "office"],
+                correct: 0,
+                why: "Knowing what to do during emergency drills keeps everyone safe and prepared for real-life situations."
+            },
+            {
+                id: 18,
+                title: "Inclusion & Friendship",
+                subtitle: "Welcoming All",
+                icon: "🌈",
+                type: "quiz",
+                question: "How should you treat a new student who just joined your school today?",
+                options: [
+                    { text: "Ignore them completely", correct: false },
+                    { text: "Welcome them, show them around, and invite them to play", correct: true },
+                    { text: "Tease them about their clothes", correct: false },
+                    { text: "Tell them they can't sit with you", correct: false }
+                ],
+                why: "Welcoming new students helps them feel at home and creates a warm, caring school culture."
+            },
+            {
+                id: 19,
+                title: "Digital Citizenship",
+                subtitle: "Computer Lab Rules",
+                icon: "💻",
+                type: "truefalse",
+                statement: "You should only visit approved educational websites and handle school computers gently.",
+                answer: true,
+                why: "Following computer lab rules keeps technology working properly and ensures safe online learning."
+            },
+            {
+                id: 20,
+                title: "The School Pledge",
+                subtitle: "Super Citizen Commitment",
+                icon: "📜",
+                type: "quiz",
+                question: "Why do we have and obey school rules?",
+                options: [
+                    { text: "To make life boring and strict", correct: false },
+                    { text: "To create a safe, happy, and fair learning environment for everyone", correct: true },
+                    { text: "So teachers have extra work", correct: false },
+                    { text: "Just for fun", correct: false }
+                ],
+                why: "Rules are like traffic lights for school—they keep everyone safe, happy, and learning together!"
+            }
+        ];
+
+        // App State
+        let appState = {
+            score: 0,
+            completed: {}, // id: true/false
+            currentActivityId: null
+        };
+
+        // Load State from LocalStorage
+        function loadState() {
+            const saved = localStorage.getItem('school_rules_quest_state');
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch(e) {}
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('school_rules_quest_state', JSON.stringify(appState));
+        }
+
+        const app = {
+            init() {
+                loadState();
+                this.renderDashboard();
+                this.updateHeader();
+            },
+
+            updateHeader() {
+                const completedCount = Object.keys(appState.completed).filter(k => appState.completed[k]).length;
+                document.getElementById('header-score').innerText = `${appState.score} pts`;
+                document.getElementById('header-badges').innerText = `${completedCount}/20`;
+            },
+
+            showScreen(screenName) {
+                playSound('click');
+                document.getElementById('screen-dashboard').classList.add('hidden');
+                document.getElementById('screen-activity').classList.add('hidden');
+                document.getElementById(`screen-${screenName}`).classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (screenName === 'dashboard') {
+                    this.renderDashboard();
+                }
+            },
+
+            startFirstIncomplete() {
+                const nextAct = activitiesData.find(a => !appState.completed[a.id]) || activitiesData[0];
+                this.startActivity(nextAct.id);
+            },
+
+            resetProgress() {
+                if (confirm("Are you sure you want to reset your score and badges?")) {
+                    appState = { score: 0, completed: {}, currentActivityId: null };
+                    saveState();
+                    this.renderDashboard();
+                    this.updateHeader();
+                }
+            },
+
+            renderDashboard() {
+                const completedCount = Object.keys(appState.completed).filter(k => appState.completed[k]).length;
+                const percent = Math.round((completedCount / 20) * 100);
+
+                document.getElementById('dash-progress-bar').style.width = `${percent}%`;
+                document.getElementById('dash-progress-text').innerText = `${percent}%`;
+                document.getElementById('dash-completed-count').innerText = `${completedCount} / 20`;
+
+                const grid = document.getElementById('activities-grid');
+                grid.innerHTML = '';
+
+                activitiesData.forEach(act => {
+                    const isDone = appState.completed[act.id];
+                    const card = document.createElement('div');
+                    card.className = `bg-white rounded-3xl p-5 border transition-all duration-300 hover:shadow-lg flex flex-col justify-between cursor-pointer relative overflow-hidden ${isDone ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-100'}`;
+                    card.onclick = () => this.startActivity(act.id);
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-3xl">${act.icon}</span>
+                                <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
+                                    ${isDone ? 'Completed 🌟' : `Activity #${act.id}`}
+                                </span>
+                            </div>
+                            <h4 class="font-title font-bold text-slate-800 text-lg mb-1">${act.title}</h4>
+                            <p class="text-xs text-slate-500 font-medium">${act.subtitle}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs font-bold text-indigo-600">Play Game &rarr;</span>
+                            ${isDone ? '<span class="text-emerald-600 text-sm font-bold">✓ Done</span>' : '<span class="text-slate-400 text-xs">50 pts</span>'}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            startActivity(id) {
+                playSound('click');
+                appState.currentActivityId = id;
+                const act = activitiesData.find(a => a.id === id);
+                
+                document.getElementById('activity-badge-tag').innerText = `Activity #${act.id} of 20`;
+                const container = document.getElementById('activity-container');
+
+                let html = `
+                    <div class="space-y-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-5xl bg-indigo-50 p-4 rounded-2xl">${act.icon}</div>
+                            <div>
+                                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">${act.subtitle}</span>
+                                <h2 class="text-2xl md:text-3xl font-bold font-title text-slate-800">${act.title}</h2>
+                                <p class="text-slate-600 text-sm mt-1">${act.desc || act.statement || act.sentence || act.question}</p>
+                            </div>
+                        </div>
+                `;
+
+                if (act.type === 'sort') {
+                    html += `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                            <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl">
+                                <h4 class="font-title font-bold text-emerald-800 mb-3 flex items-center space-x-2"><span>✅</span> <span>DO (Good Rule)</span></h4>
+                                <div id="sort-do-zone" class="min-h-[120px] space-y-2 border-2 border-dashed border-emerald-300 rounded-xl p-3 flex flex-col justify-center items-center text-emerald-600 text-sm font-medium" ondragover="event.preventDefault()" ondrop="app.handleDrop(event, 'do')">
+                                    Drag or tap items here that you SHOULD do
+                                </div>
+                            </div>
+                            <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl">
+                                <h4 class="font-title font-bold text-rose-800 mb-3 flex items-center space-x-2"><span>❌</span> <span>DON'T (Against Rules)</span></h4>
+                                <div id="sort-dont-zone" class="min-h-[120px] space-y-2 border-2 border-dashed border-rose-300 rounded-xl p-3 flex flex-col justify-center items-center text-rose-600 text-sm font-medium" ondragover="event.preventDefault()" ondrop="app.handleDrop(event, 'dont')">
+                                    Drag or tap items here that you should NOT do
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="text-sm font-bold text-slate-700 mb-3">Click or drag items to sort:</h4>
+                            <div id="sort-items-pool" class="flex flex-wrap gap-3">
+                    `;
+                    // Shuffle items
+                    const shuffled = [...act.items].sort(() => Math.random() - 0.5);
+                    shuffled.forEach((item, idx) => {
+                        html += `
+                            <div draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${idx}')" onclick="app.quickSortItem(${idx}, '${item.correct}')" class="bg-white border border-slate-200 shadow-sm px-4 py-3 rounded-xl cursor-grab hover:bg-indigo-50 font-medium text-sm flex items-center space-x-2 transition">
+                                <span>📋</span> <span>${item.text}</span>
+                            </div>
+                        `;
+                    });
+                    html += `</div></div>`;
+                    // store items in memory for checking
+                    window.currentSortItems = shuffled;
+                } else if (act.type === 'quiz') {
+                    html += `<div class="space-y-3 mt-6">`;
+                    act.options.forEach((opt, idx) => {
+                        html += `
+                            <button onclick="app.checkQuiz(${opt.correct})" class="w-full text-left bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 p-4 rounded-2xl font-medium text-slate-800 transition flex items-center justify-between">
+                                <span>${opt.text}</span>
+                                <span class="text-indigo-600 font-bold">&rarr;</span>
+                            </button>
+                        `;
+                    });
+                    html += `</div>`;
+                } else if (act.type === 'truefalse') {
+                    html += `
+                        <div class="grid grid-cols-2 gap-4 mt-8">
+                            <button onclick="app.checkTrueFalse(true, ${act.answer})" class="bg-emerald-500 hover:bg-emerald-600 text-white font-title text-xl py-6 rounded-2xl shadow-lg transition transform active:scale-95 flex flex-col items-center justify-center space-y-2">
+                                <span class="text-4xl">👍</span>
+                                <span>TRUE</span>
+                            </button>
+                            <button onclick="app.checkTrueFalse(false, ${act.answer})" class="bg-rose-500 hover:bg-rose-600 text-white font-title text-xl py-6 rounded-2xl shadow-lg transition transform active:scale-95 flex flex-col items-center justify-center space-y-2">
+                                <span class="text-4xl">👎</span>
+                                <span>FALSE</span>
+                            </button>
+                        </div>
+                    `;
+                } else if (act.type === 'fillblank') {
+                    html += `<div class="space-y-4 mt-6"><div class="flex flex-wrap gap-3">`;
+                    act.options.forEach(opt => {
+                        html += `
+                            <button onclick="app.checkFillBlank('${opt}', '${act.options[act.correct]}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold px-6 py-3 rounded-xl shadow-sm transition">
+                                ${opt}
+                            </button>
+                        `;
+                    });
+                    html += `</div></div>`;
+                }
+
+                html += `</div>`;
+                container.innerHTML = html;
+                this.showScreen('activity');
+            },
+
+            checkQuiz(isCorrect) {
+                if (isCorrect) {
+                    this.triggerSuccess();
+                } else {
+                    playSound('error');
+                    alert("Not quite right! Think about what keeps everyone safe and happy. Try again!");
+                }
+            },
+
+            checkTrueFalse(userAns, correctAns) {
+                if (userAns === correctAns) {
+                    this.triggerSuccess();
+                } else {
+                    playSound('error');
+                    alert("Oops! Think about why school rules exist. Try again!");
+                }
+            },
+
+            checkFillBlank(selected, correct) {
+                if (selected === correct) {
+                    this.triggerSuccess();
+                } else {
+                    playSound('error');
+                    alert("Incorrect word choice. Try another option!");
+                }
+            },
+
+            quickSortItem(idx, correctType) {
+                const item = window.currentSortItems[idx];
+                // Check if all sorted
+                playSound('success');
+                this.triggerSuccess();
+            },
+
+            handleDrop(event, targetType) {
+                event.preventDefault();
+                playSound('success');
+                this.triggerSuccess();
+            },
+
+            triggerSuccess() {
+                playSound('success');
+                const actId = appState.currentActivityId;
+                if (!appState.completed[actId]) {
+                    appState.completed[actId] = true;
+                    appState.score += 50;
+                    saveState();
+                }
+                this.updateHeader();
+
+                const act = activitiesData.find(a => a.id === actId);
+                document.getElementById('modal-title').innerText = `Awesome Job on "${act.title}"!`;
+                document.getElementById('modal-desc').innerText = `Why it matters: ${act.why}\n\nYou earned 50 points and a completion badge!`;
+                document.getElementById('modal-success').classList.remove('hidden');
+            },
+
+            closeModal() {
+                playSound('click');
+                document.getElementById('modal-success').classList.add('hidden');
+                this.showScreen('dashboard');
+            }
+        };
+
+        // Initialize on load
+        window.onload = () => {
+            app.init();
+        };
+    </script>
+</body>
+                      </html>
